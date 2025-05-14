@@ -79,37 +79,49 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Dark Gray Theme - not too dark, softer than pure black */
+  --background: oklch(0.25 0.02 285); /* Dark gray with slight blue tint */
+  --foreground: oklch(0.95 0.01 280); /* Off-white with slight blue tint */
+  
+  --card: oklch(0.3 0.02 285); /* Slightly lighter than background */
+  --card-foreground: oklch(0.95 0.01 280);
+  
+  --popover: oklch(0.28 0.02 285);
+  --popover-foreground: oklch(0.95 0.01 280);
+  
+  --primary: oklch(0.6 0.18 263); /* Purple-ish blue - distinctive but not harsh */
+  --primary-foreground: oklch(0.98 0 0);
+  
+  --secondary: oklch(0.32 0.03 270); /* Slightly purplish dark gray */
+  --secondary-foreground: oklch(0.95 0.01 280);
+  
+  --muted: oklch(0.35 0.01 285); /* Light dark gray */
+  --muted-foreground: oklch(0.75 0.01 280); /* Medium gray */
+  
+  --accent: oklch(0.35 0.08 265); /* Subtle accent with purple hint */
+  --accent-foreground: oklch(0.98 0 0);
+  
+  --destructive: oklch(0.65 0.18 25); /* Softer red */
+  --border: oklch(0.4 0.01 285); /* Medium-dark gray border */
+  --input: oklch(0.35 0.01 270 / 30%); /* Slightly translucent input */
+  --ring: oklch(0.5 0.15 265); /* Purple-ish focus ring */
+  
+  /* Chart colors with better contrast on dark background */
+  --chart-1: oklch(0.7 0.2 250);  /* Lavender */
+  --chart-2: oklch(0.7 0.17 180); /* Teal */
+  --chart-3: oklch(0.75 0.18 70);  /* Warm yellow */
+  --chart-4: oklch(0.65 0.2 320);  /* Pink */
+  --chart-5: oklch(0.65 0.2 30);   /* Soft orange */
+  
+  /* Sidebar styling */
+  --sidebar: oklch(0.22 0.02 285); /* Slightly darker than main background */
+  --sidebar-foreground: oklch(0.95 0.01 280);
+  --sidebar-primary: oklch(0.6 0.18 263); /* Match primary */
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.32 0.03 270); /* Match secondary */
+  --sidebar-accent-foreground: oklch(0.95 0.01 280);
+  --sidebar-border: oklch(0.4 0.01 285 / 20%); /* Subtle border */
+  --sidebar-ring: oklch(0.5 0.15 265); /* Match ring */
 }
 
 @layer base {
@@ -118,5 +130,36 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Add smooth transitions for theme changes */
+  :root {
+    --transition-duration: 0.3s;
+  }
+  
+  html {
+    color-scheme: light;
+  }
+  
+  html.dark {
+    color-scheme: dark;
+  }
+  
+  html, body, * {
+    transition: background-color var(--transition-duration) ease,
+                border-color var(--transition-duration) ease,
+                color var(--transition-duration) ease,
+                fill var(--transition-duration) ease,
+                stroke var(--transition-duration) ease;
+  }
+  
+  /* Enhanced focus styles */
+  *:focus-visible {
+    @apply outline-primary outline-offset-2;
+  }
+  
+  /* Calendar specific styles */
+  .calendar-today {
+    @apply font-bold ring-1 ring-primary;
   }
 }
