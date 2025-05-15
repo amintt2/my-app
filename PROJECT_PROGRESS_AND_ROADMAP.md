@@ -21,6 +21,7 @@ This document tracks the development progress of the Next.js AI Calendar applica
 - [x] Added "Today's Focus" card.
 - [x] Retained and integrated `EventsCard`.
 - [x] Modified `EventsCard.tsx` to accept an optional `title` prop.
+- [ ] Remove the `Footer.tsx` from dashboard page
 
 ### Calendar Page (`/calendar`):
 - [x] Updated to display `CalendarCard` and `EventsCard`, similar to the initial main page.
@@ -98,13 +99,28 @@ This document tracks the development progress of the Next.js AI Calendar applica
 
 The goal is for the AI to autonomously continue development with minimal human intervention, focusing on building a fully functional and robust application.
 
+### Humain Review: Redo The web site main page and other details
+- [ ] Show the `Footer.tsx` only for not logged in users and in the `MainPage.tsx` page
+- [ ] Create a new `MainPage.tsx` component that will be the main page for the web site
+- [ ] `MainPage.tsx` will show the features of the web site and the `Footer.tsx`
+- [ ] `MainPage.tsx` will have a button to go to the `LoginPage.tsx` ext
+- [ ] need to implement a logic off top and bottom  Exemple the `Header.tsx` need clear separation from the `Navbar.tsx`, so they never overlap.
+- [ ] need to implement a logic of left and right Exemple the `Sidebar.tsx` need clear separation from the `Content.tsx`, so they never overlap.
+- [ ] Components need to be responsive and adapt to the screen size of the device.
+- [ ] No usage off flex they need to be grid based, and the grid need to be responsive.
+- [ ] The need a clear and more detailed `CalendarCard.tsx` that will show the events of the day and the events of the week, and be more detailed.
+- [ ] The need a clear and more detailed `EventsCard.tsx` and a redisigned `EventsPage.tsx`
 ### Priority 1: Backend & Data Persistence (Transition from Mock to Real)
-- [ ] **Real Authentication Implementation:**
-    - [ ] Integrate `NextAuth.js` (or similar auth solution like Supabase Auth, Clerk).
-    - [ ] Implement database-backed user accounts (registration, login, password management).
-    - [ ] Secure password handling (hashing, salting).
-    - [ ] Implement session management.
-    - [ ] Add "Forgot Password" / Password Reset functionality.
+- [x] **Real Authentication Implementation:** (Transitioned from NextAuth.js to Supabase Auth)
+    - [x] Initial NextAuth.js setup was done (installed and basic API route created).
+    - [x] NextAuth.js Credentials provider was configured (mock authorize function).
+    - [x] Header and Login Form were updated for NextAuth.
+    - [x] **Switched to Supabase Auth:**
+        - [x] Installed `@supabase/supabase-js` and `@supabase/ssr` (formerly `@supabase/auth-helpers-nextjs`).
+        - [x] Configured Supabase client (`lib/supabase/client.ts`).
+        - [x] Updated `Header.tsx`, `LoginForm.tsx`, `SignupForm.tsx`, `AppLayout.tsx`, `AccountSettings.tsx`, and `MainPage.tsx` (app/page.tsx) to use Supabase Auth.
+        - [ ] Note: Email confirmation is currently handled by Supabase project settings (can be disabled for easier development). Consider social login (e.g., Google) for simpler user onboarding in the future.
+    - [ ] Implement database-backed user accounts (registration, login, password management) - *This is now largely handled by Supabase, but ensure user profile data is managed*.
 - [ ] **Database Integration:**
     - [ ] Choose and set up a database (e.g., Supabase, PlanetScale, Firebase Firestore, MongoDB Atlas).
     - [ ] Define database schemas for:
@@ -174,3 +190,12 @@ The goal is for the AI to autonomously continue development with minimal human i
 - [ ] **Resource Management:** (If applicable in a live environment) Be mindful of API limits, database query efficiency.
 - [ ] **Proactive Problem Solving:** If a planned step is blocked or unclear, attempt to break it down or research potential solutions before halting.
 - [ ] **Follow Established Patterns:** Continue using existing architectural patterns (e.g., Context API for state, component structure, UI library conventions) unless a clear reason for deviation arises. 
+
+
+
+
+
+## Autonomous Operation Directives for AI:
+
+Prompt:
+Ok folow what is needed next in this project and do it, follow the ui @accordion.tsx @alert-dialog.tsx @alert.tsx @ui @aspect-ratio.tsx  like this 3 exemple and build the componant like sad in the @PROJECT_PROGRESS_AND_ROADMAP.md . Do the goal and chek what you did, you are autonomus moste off the project juste continue the work until stoped. take youre time to discover the codebase and how we work before starting.

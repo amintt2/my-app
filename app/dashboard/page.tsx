@@ -17,12 +17,20 @@ export default function DashboardPage() {
   const nextWeek = new Date(today)
   nextWeek.setDate(nextWeek.getDate() + 7)
 
-  const [events] = React.useState<CalendarEvent[]>([
+  // Explicitly type sample events and add unique IDs
+  const sampleEventData: Omit<CalendarEvent, 'id'>[] = [
     { date: today, title: "Team Meeting", type: "work", description: "Discuss project updates" },
     { date: tomorrow, title: "Doctor's Appointment", type: "personal" },
     { date: nextWeek, title: "Project Deadline", type: "work", description: "Submit phase 1 deliverables" },
     { date: today, title: "Lunch with Client", type: "work" },
-  ])
+  ];
+
+  const initialEvents: CalendarEvent[] = sampleEventData.map((event): CalendarEvent => ({ 
+    ...event, 
+    id: crypto.randomUUID() 
+  }));
+
+  const [events] = React.useState<CalendarEvent[]>(initialEvents)
 
   // Filter events for today to show a summary
   const todaysEvents = events.filter(

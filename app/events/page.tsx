@@ -30,12 +30,12 @@ tomorrow.setDate(tomorrow.getDate() + 1)
 const nextWeek = new Date(today)
 nextWeek.setDate(nextWeek.getDate() + 7)
 
-// Create sample events with realistic dates
+// Create sample events with realistic dates and unique IDs
 const sampleEventsData: CalendarEvent[] = [
   { date: today, title: "Team Meeting", type: "work" },
   { date: tomorrow, title: "Doctor's Appointment", type: "personal" },
   { date: nextWeek, title: "Project Deadline", type: "work" },
-]
+].map(event => ({ ...event, id: crypto.randomUUID() } as CalendarEvent)); // Ensure type and add ID
 
 export default function EventsPage() {
   const [events, setEvents] = React.useState<CalendarEvent[]>(sampleEventsData)
@@ -125,35 +125,44 @@ export default function EventsPage() {
             <p className="text-muted-foreground mb-4">Click the button above to create your first event.</p>
           </div>
         ) : (
-          <ul className="space-y-4">
-            {events.map((event) => (
-              <li key={event.id} className="p-4 bg-card rounded-lg shadow">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="text-xl font-semibold text-card-foreground">{event.title}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(event.date).toLocaleDateString()} at {new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - <span className="capitalize">{event.type}</span>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {events.map((event) => {
+              const eventDate = new Date(event.date);
+              const typeColor = event.type === 'work' ? 'bg-blue-500' : event.type === 'personal' ? 'bg-green-500' : 'bg-gray-400';
+
+              return (
+                <div key={event.id} className="bg-card rounded-lg shadow-lg border flex flex-col">
+                  <div className="p-5 flex-grow">
+                    <div className="flex justify-between items-start mb-2">
+                      <h2 className="text-lg font-semibold text-card-foreground leading-tight">{event.title}</h2>
+                      <span className={`px-2 py-0.5 text-xs font-medium text-white rounded-full ${typeColor}`}>
+                        {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {eventDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      {eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                     </p>
                     {event.description && (
-                      <p className="mt-2 text-sm text-card-foreground whitespace-pre-wrap">
+                      <p className="mb-3 text-sm text-card-foreground/90 whitespace-pre-wrap break-words">
                         {event.description}
                       </p>
                     )}
                   </div>
-                  <div className="flex space-x-2 shrink-0 ml-4">
-                    <Button variant="outline" size="icon" onClick={() => handleEditEvent(event)}>
-                      <EditIcon className="h-4 w-4" />
-                      <span className="sr-only">Edit Event</span>
+                  <div className="p-3 bg-muted/30 border-t flex justify-end space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEditEvent(event)} className="h-8 px-3">
+                      <EditIcon className="mr-1.5 h-3.5 w-3.5" /> Edit
                     </Button>
-                    <Button variant="destructive" size="icon" onClick={() => confirmDeleteEvent(event)}>
-                      <Trash2Icon className="h-4 w-4" />
-                      <span className="sr-only">Delete Event</span>
+                    <Button variant="destructive" size="sm" onClick={() => confirmDeleteEvent(event)} className="h-8 px-3">
+                      <Trash2Icon className="mr-1.5 h-3.5 w-3.5" /> Delete
                     </Button>
                   </div>
                 </div>
-              </li>
-            ))}
-          </ul>
+              );
+            })}
+          </div>
         )}
       </div>
     </AppLayout>

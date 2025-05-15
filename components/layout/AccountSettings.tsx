@@ -24,32 +24,54 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useAuth } from "@/contexts/AuthContext" // For logging out on account deletion
 import { useRouter } from "next/navigation"
 import { toast } from "sonner" // Import toast
+import { createClient } from "@/lib/supabase/client" // Import Supabase client
+import type { User } from '@supabase/supabase-js' // Import Supabase User type
 
 export function AccountSettings() {
-  const [username, setUsername] = React.useState("CurrentUser")
-  const [email, setEmail] = React.useState("user@example.com")
+  const supabase = createClient(); // Initialize Supabase client
+  const router = useRouter();
+  
+  const [currentUser, setCurrentUser] = React.useState<User | null>(null);
+  const [username, setUsername] = React.useState("") // Initialize with empty string
+  const [email, setEmail] = React.useState("") // Initialize with empty string
   const [isEditingUsername, setIsEditingUsername] = React.useState(false)
   const [isEditingEmail, setIsEditingEmail] = React.useState(false)
-  // For password change, ideally we'd have separate states and validation
   const [currentPassword, setCurrentPassword] = React.useState("")
   const [newPassword, setNewPassword] = React.useState("")
   const [confirmNewPassword, setConfirmNewPassword] = React.useState("")
 
-  const { logout, user } = useAuth()
-  const router = useRouter()
-
   React.useEffect(() => {
-    if (user) {
-      setUsername(user.name || "User");
-      setEmail(user.email || "user@example.com");
-    }
-  }, [user]);
+    const fetchUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user);
+        setUsername(session.user.user_metadata?.full_name || session.user.email || "");
+        setEmail(session.user.email || "");
+      }
+    };
+    fetchUser();
+
+    // Listen for auth state changes to update user info if needed
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+        setUsername(session.user.user_metadata?.full_name || session.user.email || "");
+        setEmail(session.user.email || "");
+      } else {
+        setCurrentUser(null);
+        setUsername("");
+        setEmail("");
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleSaveChanges = () => {
-    // Basic validation example for password change
     if (newPassword && newPassword !== confirmNewPassword) {
       toast.error("New passwords do not match.");
       return;
@@ -59,9 +81,12 @@ export function AccountSettings() {
       return;
     }
 
-    // TODO: Implement actual save logic for username, email, and password
+    // TODO: Implement actual save logic for username, email, and password using Supabase
+    // For username/email (if different from Supabase full_name/email, these might be custom fields or need different handling)
+    // For password: await supabase.auth.updateUser({ password: newPassword }) - this requires current password flow or other checks for security.
+    // Consider how to update user_metadata.full_name if 'username' state is meant for that.
     console.log("Saving changes:", { username, email, newPassword });
-    toast.success("Account settings saved successfully!")
+    toast.success("Account settings saved successfully! (Mock)") // Update to reflect real save
     
     setCurrentPassword("");
     setNewPassword("");
@@ -70,12 +95,15 @@ export function AccountSettings() {
     setIsEditingEmail(false);
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     console.log("Account deletion requested");
-    // After successful deletion from backend:
-    logout();
-    toast.success("Account deleted successfully.", { description: "You have been logged out and redirected." });
+    // TODO: Implement actual account deletion on the backend (e.g., calling a Supabase Edge Function)
+    // This is a placeholder for client-side actions after backend confirms deletion.
+    
+    await supabase.auth.signOut(); // Sign out the user
+    toast.success("Account deleted successfully. (Mock)", { description: "You have been logged out and redirected." });
     router.push("/");
+    router.refresh(); // To ensure UI updates correctly
   };
 
   return (
@@ -87,13 +115,13 @@ export function AccountSettings() {
       <CardContent className="space-y-6">
         {/* Username Section */}
         <div className="space-y-2">
-          <Label htmlFor="username">Username</Label>
+          <Label htmlFor="username">Full Name (from Supabase)</Label>
           <div className="flex items-center space-x-2">
             <Input
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              disabled={!isEditingUsername}
+              disabled={!isEditingUsername} // Or manage this based on user_metadata.full_name directly
               className="flex-grow"
             />
             <Button variant="outline" onClick={() => setIsEditingUsername(!isEditingUsername)}>
@@ -104,14 +132,14 @@ export function AccountSettings() {
 
         {/* Email Section */}
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Email (from Supabase)</Label>
           <div className="flex items-center space-x-2">
             <Input
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={!isEditingEmail}
+              onChange={(e) => setEmail(e.target.value)} // Email change needs a verification flow via Supabase
+              disabled={!isEditingEmail} // Or handle differently if email change is complex
               className="flex-grow"
             />
             <Button variant="outline" onClick={() => setIsEditingEmail(!isEditingEmail)}>
@@ -143,14 +171,14 @@ export function AccountSettings() {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-stretch gap-4 pt-6 sm:flex-row sm:justify-between">
-        <Button onClick={handleSaveChanges} className="w-full sm:w-auto">Save All Changes</Button>
+        <Button onClick={handleSaveChanges} className="w-full sm:w-auto" disabled={!currentUser}>Save All Changes</Button>
         
         <Separator orientation="vertical" className="hidden sm:block h-auto" />
 
         {/* Danger Zone - Delete Account Button */}
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="w-full sm:w-auto">Delete Account</Button>
+            <Button variant="destructive" className="w-full sm:w-auto" disabled={!currentUser}>Delete Account</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -163,7 +191,11 @@ export function AccountSettings() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteAccount} className={buttonVariants({ variant: "destructive" })}>
+              <AlertDialogAction 
+                onClick={handleDeleteAccount} 
+                className={buttonVariants({ variant: "destructive" })}
+                disabled={!currentUser}
+              >
                 Yes, Delete My Account
               </AlertDialogAction>
             </AlertDialogFooter>

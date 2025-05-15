@@ -4,13 +4,15 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { CalendarEvent } from "@/types/calendar" // Assuming this path is correct
 
 interface CalendarCardProps {
   date: Date | undefined
   onDateChange: (date: Date | undefined) => void
+  events?: CalendarEvent[] // Add events prop
 }
 
-export function CalendarCard({ date, onDateChange }: CalendarCardProps) {
+export function CalendarCard({ date, onDateChange, events = [] }: CalendarCardProps) { // Provide default for events
   const currentDate = date || new Date()
   const currentMonth = currentDate.getMonth()
   const currentYear = currentDate.getFullYear()
@@ -47,6 +49,15 @@ export function CalendarCard({ date, onDateChange }: CalendarCardProps) {
   const handleDayClick = (day: number) => {
     const newDate = new Date(currentYear, currentMonth, day)
     onDateChange(newDate)
+  }
+
+  const getEventsForDay = (day: number, month: number, year: number) => {
+    return events.filter(event => {
+      const eventDate = new Date(event.date)
+      return eventDate.getDate() === day &&
+             eventDate.getMonth() === month &&
+             eventDate.getFullYear() === year
+    })
   }
 
   return (
@@ -92,17 +103,26 @@ export function CalendarCard({ date, onDateChange }: CalendarCardProps) {
             ))}
             
             {/* Current month days */}
-            {days.map((day) => (
-              <div 
-                key={day} 
-                className={`py-2 text-sm cursor-pointer rounded-full hover:bg-muted ${
-                  isSelectedDay(day) ? 'bg-primary text-primary-foreground font-medium' : ''
-                }`}
-                onClick={() => handleDayClick(day)}
-              >
-                {day}
-              </div>
-            ))}
+            {days.map((day) => {
+              const dayEvents = getEventsForDay(day, currentMonth, currentYear)
+              const selectedClass = isSelectedDay(day) ? 'bg-primary text-primary-foreground font-medium' : ''; // Pre-calculate conditional class
+              return (
+                <div 
+                  key={day} 
+                  className={`py-2 text-sm cursor-pointer rounded-full hover:bg-muted relative ${selectedClass}`}
+                  onClick={() => handleDayClick(day)}
+                >
+                  {day}
+                  {dayEvents.length > 0 && (
+                    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex space-x-0.5">
+                      {dayEvents.slice(0, 3).map((_, index) => ( // Show max 3 dots
+                        <div key={index} className="h-1 w-1 bg-blue-500 rounded-full"></div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
             
             {/* Fill remaining cells with next month days */}
             {Array.from({ length: (7 - ((days.length + prevMonthDays.length) % 7)) % 7 }, (_, i) => (
@@ -112,6 +132,33 @@ export function CalendarCard({ date, onDateChange }: CalendarCardProps) {
             ))}
           </div>
         </div>
+
+        {/* Display events for selected day */}
+        {date && (
+          <div className="mt-4 pt-4 border-t">
+            <h3 className="text-sm font-medium mb-2">
+              Events for {date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}:
+            </h3>
+            {(() => {
+              const selectedDayEvents = getEventsForDay(date.getDate(), date.getMonth(), date.getFullYear())
+              if (selectedDayEvents.length > 0) {
+                return (
+                  <ul className="space-y-1 text-xs">
+                    {selectedDayEvents.map((event, index) => (
+                      <li key={index} className="flex items-center">
+                        <span className={`mr-2 h-2 w-2 rounded-full ${event.type === 'work' ? 'bg-blue-500' : event.type === 'personal' ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                        {event.title}
+                        {event.description && <span className="text-muted-foreground ml-1">- {event.description}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )
+              } else {
+                return <p className="text-xs text-muted-foreground">No events for this day.</p>
+              }
+            })()}
+          </div>
+        )}
       </CardContent>
       <CardFooter className="border-t pt-4 flex justify-between">
         <span className="text-xs text-muted-foreground">
