@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from '@/components/ui/button'
 import { GameHeader } from "@/components/game/game-header"
@@ -12,19 +12,60 @@ import { StatsTab } from "@/components/game/stats-tab"
 import { Notifications } from "@/components/game/notifications"
 import { useGameState } from "@/hooks/use-game-state"
 import SettingsPage from '@/components/game/settings-page'
+import SaveSelectionPage from '@/components/game/save-selection-page'
+import { GameState } from '@/types/game'
+import { loadGameFromCookie } from '@/lib/cookie-utils'
 
 export default function ZeubClicker() {
   const {
     gameState,
     notifications,
+    notificationSettings,
     handleClick,
     buyUpgrade,
     buyStock,
     sellStock,
-    resetGame
+    resetGame,
+    loadSpecificGame
   } = useGameState()
   
   const [showSettings, setShowSettings] = useState(false)
+  const [showSaveSelection, setShowSaveSelection] = useState(true)
+  const [gameInitialized, setGameInitialized] = useState(false)
+  
+  // Check if there's a saved game on component mount
+  useEffect(() => {
+    const savedGame = loadGameFromCookie()
+    if (!savedGame) {
+      // No saved game, skip save selection and start new game
+      setShowSaveSelection(false)
+      setGameInitialized(true)
+    }
+  }, [])
+  
+  const handleLoadGame = (savedGameState: GameState) => {
+    if (loadSpecificGame) {
+      loadSpecificGame(savedGameState)
+    }
+    setShowSaveSelection(false)
+    setGameInitialized(true)
+  }
+  
+  const handleNewGame = () => {
+    resetGame()
+    setShowSaveSelection(false)
+    setGameInitialized(true)
+  }
+  
+  // Show save selection page if not initialized
+  if (showSaveSelection && !gameInitialized) {
+    return (
+      <SaveSelectionPage 
+        onLoadGame={handleLoadGame}
+        onNewGame={handleNewGame}
+      />
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-purple-800 p-4">

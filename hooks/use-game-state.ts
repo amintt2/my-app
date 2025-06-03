@@ -274,6 +274,11 @@ export function useGameState() {
     setNotifications([])
   }, [])
 
+  const loadSpecificGame = useCallback((savedGameState: GameState) => {
+    setGameState(savedGameState)
+    setNotifications([])
+  }, [])
+
   return {
     gameState,
     notifications,
@@ -282,6 +287,7 @@ export function useGameState() {
     buyUpgrade,
     buyStock,
     sellStock,
-    resetGame
+    resetGame,
+    loadSpecificGame
   }
 }

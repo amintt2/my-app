@@ -1,5 +1,6 @@
 import { GameState, Upgrade, Stock, Achievement } from '@/types/game'
 import { UPGRADES, STOCKS, ACHIEVEMENTS } from './game-data'
+import { saveGameToCookie, loadGameFromCookie } from './cookie-utils'
 
 // Utility functions
 export const formatNumber = (num: number): string => {
@@ -12,14 +13,13 @@ export const formatNumber = (num: number): string => {
 
 export const saveGame = (state: GameState) => {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('zeubClickerSave', JSON.stringify(state))
+    saveGameToCookie(state)
   }
 }
 
 export const loadGame = (): GameState | null => {
   if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('zeubClickerSave')
-    return saved ? JSON.parse(saved) : null
+    return loadGameFromCookie()
   }
   return null
 }
