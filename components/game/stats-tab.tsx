@@ -46,7 +46,7 @@ export function StatsTab({ gameState }: StatsTabProps) {
             <div className="p-3 rounded-lg bg-white/5">
               <div className="text-sm text-white/70">Succès Débloqués</div>
               <div className="text-xl font-bold">
-                {Object.values(gameState.achievements).filter(Boolean).length} / {ACHIEVEMENTS.length}
+                {Object.values(gameState.unlockedAchievements).filter(Boolean).length} / {ACHIEVEMENTS.length}
               </div>
             </div>
           </div>

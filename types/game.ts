@@ -8,10 +8,15 @@ export interface GameState {
   experience: number
   experienceToNext: number
   multiplier: number
+  startTime: number
   upgrades: { [key: string]: { count: number; cost: number } }
-  stockMarket: { [key: string]: { price: number; owned: number; trend: number } }
-  powerUps: { [key: string]: { active: boolean; timeLeft: number } }
-  achievements: { [key: string]: boolean }
+  stockMarket: { [key: string]: { price: number; owned: number; trend: number; priceHistory: number[] } }
+  powerUps: {
+    golden: { active: boolean; timeLeft: number }
+    frenzy: { active: boolean; timeLeft: number }
+    clickFrenzy: { active: boolean; timeLeft: number }
+  }
+  unlockedAchievements: { [key: string]: boolean }
 }
 
 export interface Upgrade {

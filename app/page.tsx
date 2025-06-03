@@ -1,6 +1,8 @@
 "use client"
 
+import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from '@/components/ui/button'
 import { GameHeader } from "@/components/game/game-header"
 import { ClickerArea } from "@/components/game/clicker-area"
 import { UpgradesTab } from "@/components/game/upgrades-tab"
@@ -9,6 +11,7 @@ import { AchievementsTab } from "@/components/game/achievements-tab"
 import { StatsTab } from "@/components/game/stats-tab"
 import { Notifications } from "@/components/game/notifications"
 import { useGameState } from "@/hooks/use-game-state"
+import SettingsPage from '@/components/game/settings-page'
 
 export default function ZeubClicker() {
   const {
@@ -17,13 +20,29 @@ export default function ZeubClicker() {
     handleClick,
     buyUpgrade,
     buyStock,
-    sellStock
+    sellStock,
+    resetGame
   } = useGameState()
+  
+  const [showSettings, setShowSettings] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-purple-800 p-4">
       <div className="container mx-auto max-w-7xl">
-        <GameHeader gameState={gameState} />
+        <div className="flex justify-between items-start mb-8">
+          <div className="flex-1">
+            <GameHeader gameState={gameState} />
+          </div>
+          <Button 
+            onClick={() => setShowSettings(true)}
+            variant="outline"
+            size="sm"
+            className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20"
+          >
+            ⚙️ Paramètres
+          </Button>
+        </div>
+        
         <Notifications notifications={notifications} />
 
         {/* Main Game Area */}
@@ -69,6 +88,15 @@ export default function ZeubClicker() {
             </Tabs>
           </div>
         </div>
+        
+        {/* Settings Modal */}
+        {showSettings && (
+          <SettingsPage 
+            gameState={gameState}
+            onClose={() => setShowSettings(false)}
+            onResetGame={resetGame}
+          />
+        )}
       </div>
     </div>
   )

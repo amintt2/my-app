@@ -1,5 +1,5 @@
-import { GameState } from '@/types/game'
-import { UPGRADES, STOCKS } from './game-data'
+import { GameState, Upgrade, Stock, Achievement } from '@/types/game'
+import { UPGRADES, STOCKS, ACHIEVEMENTS } from './game-data'
 
 // Utility functions
 export const formatNumber = (num: number): string => {
@@ -24,35 +24,34 @@ export const loadGame = (): GameState | null => {
   return null
 }
 
-export const getInitialGameState = (): GameState => {
-  // Initialize upgrades
-  const initialUpgrades: { [key: string]: { count: number; cost: number } } = {}
-  UPGRADES.forEach(upgrade => {
-    initialUpgrades[upgrade.id] = { count: 0, cost: upgrade.baseCost }
-  })
-  
-  // Initialize stocks
-  const initialStocks: { [key: string]: { price: number; owned: number; trend: number } } = {}
-  STOCKS.forEach(stock => {
-    initialStocks[stock.id] = { price: stock.basePrice, owned: 0, trend: 0 }
-  })
-  
-  return {
-    money: 0,
-    totalEarned: 0,
-    perClick: 1,
-    perSecond: 0,
-    level: 1,
-    experience: 0,
-    experienceToNext: 100,
-    multiplier: 1.0,
-    upgrades: initialUpgrades,
-    stockMarket: initialStocks,
-    powerUps: {
-      golden: { active: false, timeLeft: 0 },
-      frenzy: { active: false, timeLeft: 0 },
-      clickFrenzy: { active: false, timeLeft: 0 }
-    },
-    achievements: {}
+export const getInitialGameState = (): GameState => ({
+  money: 0,
+  totalEarned: 0,
+  perClick: 1,
+  perSecond: 0,
+  level: 1,
+  experience: 0,
+  experienceToNext: 100,
+  multiplier: 1.0,
+  startTime: Date.now(),
+  upgrades: UPGRADES.reduce((acc, upgrade) => {
+    acc[upgrade.id] = {
+      count: 0,
+      cost: upgrade.baseCost
+    }
+    return acc
+  }, {} as Record<string, { count: number; cost: number }>),
+  stockMarket: STOCKS.reduce((acc, stock) => {
+      acc[stock.id] = { price: stock.basePrice, owned: 0, trend: 0, priceHistory: [stock.basePrice] }
+      return acc
+    }, {} as Record<string, { price: number; owned: number; trend: number; priceHistory: number[] }>),
+  unlockedAchievements: ACHIEVEMENTS.reduce((acc: Record<string, boolean>, achievement: Achievement) => {
+    acc[achievement.id] = false
+    return acc
+  }, {} as Record<string, boolean>),
+  powerUps: {
+    golden: { active: false, timeLeft: 0 },
+    frenzy: { active: false, timeLeft: 0 },
+    clickFrenzy: { active: false, timeLeft: 0 }
   }
-}
+})

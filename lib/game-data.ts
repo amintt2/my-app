@@ -1,7 +1,7 @@
 import { Upgrade, Stock, Achievement } from '@/types/game'
 
 export const UPGRADES: Upgrade[] = [
-  { id: "cursor", name: "Curseur Magique", description: "+1 par seconde", baseCost: 15, baseProduction: 1, emoji: "👆" },
+  { id: "cursor", name: "Curseur Magique", description: "+1 par clic", baseCost: 15, baseProduction: 0, emoji: "👆" },
   { id: "grandma", name: "Grand-mère Zeub", description: "+5 par seconde", baseCost: 100, baseProduction: 5, emoji: "👵" },
   { id: "farm", name: "Ferme à Zeub", description: "+25 par seconde", baseCost: 1100, baseProduction: 25, emoji: "🚜" },
   { id: "mine", name: "Mine de Zeub", description: "+100 par seconde", baseCost: 12000, baseProduction: 100, emoji: "⛏️" },

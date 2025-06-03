@@ -21,7 +21,7 @@ export function AchievementsTab({ gameState }: AchievementsTabProps) {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {ACHIEVEMENTS.map(achievement => {
-            const unlocked = gameState.achievements[achievement.id]
+            const unlocked = gameState.unlockedAchievements[achievement.id]
             
             return (
               <div 

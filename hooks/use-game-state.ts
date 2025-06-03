@@ -3,24 +3,33 @@
 import { useState, useEffect, useCallback } from "react"
 import { GameState } from "@/types/game"
 import { UPGRADES, STOCKS, ACHIEVEMENTS } from "@/lib/game-data"
-import { saveGame, loadGame, getInitialGameState } from "@/lib/game-utils"
+import { getInitialGameState } from "@/lib/game-utils"
+import { 
+  saveGameToCookie, 
+  loadGameFromCookie, 
+  loadNotificationSettings,
+  NotificationSettings 
+} from "@/lib/cookie-utils"
 
 export function useGameState() {
   const [gameState, setGameState] = useState<GameState>(getInitialGameState())
   const [notifications, setNotifications] = useState<string[]>([])
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(loadNotificationSettings())
 
   // Initialize game state
   useEffect(() => {
-    const saved = loadGame()
+    const saved = loadGameFromCookie()
     if (saved) {
       setGameState(saved)
     }
+    // Load notification settings
+    setNotificationSettings(loadNotificationSettings())
   }, [])
 
-  // Auto-save every 10 seconds
+  // Auto-save every 10 seconds to cookies
   useEffect(() => {
     const interval = setInterval(() => {
-      saveGame(gameState)
+      saveGameToCookie(gameState)
     }, 10000)
     return () => clearInterval(interval)
   }, [gameState])
@@ -51,10 +60,11 @@ export function useGameState() {
         let multiplierChanged = false
         
         Object.keys(newPowerUps).forEach(key => {
-          if (newPowerUps[key].active && newPowerUps[key].timeLeft > 0) {
-            newPowerUps[key].timeLeft -= 1
-            if (newPowerUps[key].timeLeft <= 0) {
-              newPowerUps[key].active = false
+          const powerUp = newPowerUps[key as keyof typeof newPowerUps]
+          if (powerUp.active && powerUp.timeLeft > 0) {
+            powerUp.timeLeft -= 1000
+            if (powerUp.timeLeft <= 0) {
+              powerUp.active = false
               multiplierChanged = true
             }
           }
@@ -82,14 +92,22 @@ export function useGameState() {
         
         Object.keys(newStockMarket).forEach(stockId => {
           const change = (Math.random() - 0.5) * 0.2
-          newStockMarket[stockId].price *= (1 + change)
-          newStockMarket[stockId].trend = change
+          const newPrice = newStockMarket[stockId].price * (1 + change)
           
           // Prevent prices from going too low
           const basePrice = STOCKS.find(s => s.id === stockId)?.basePrice || 10
-          if (newStockMarket[stockId].price < basePrice * 0.1) {
-            newStockMarket[stockId].price = basePrice * 0.1
+          const finalPrice = Math.max(newPrice, basePrice * 0.1)
+          
+          newStockMarket[stockId].price = finalPrice
+          newStockMarket[stockId].trend = change
+          
+          // Update price history (keep last 20 points)
+          const history = [...(newStockMarket[stockId].priceHistory || [])]
+          history.push(finalPrice)
+          if (history.length > 20) {
+            history.shift()
           }
+          newStockMarket[stockId].priceHistory = history
         })
         
         return {
@@ -104,25 +122,30 @@ export function useGameState() {
   // Check achievements
   useEffect(() => {
     ACHIEVEMENTS.forEach(achievement => {
-      if (!gameState.achievements[achievement.id] && achievement.condition(gameState)) {
+      if (!gameState.unlockedAchievements[achievement.id] && achievement.condition(gameState)) {
         setGameState(prev => ({
           ...prev,
-          achievements: {
-            ...prev.achievements,
-            [achievement.id]: true
+          unlockedAchievements: {
+             ...prev.unlockedAchievements,
+             [achievement.id]: true
           }
         }))
-        addNotification(`🏆 Succès débloqué: ${achievement.name}!`)
+        addNotification(`🏆 Succès débloqué: ${achievement.name}!`, 'achievements')
       }
     })
   }, [gameState.money, gameState.totalEarned, gameState.level, gameState.stockMarket])
 
-  const addNotification = useCallback((message: string) => {
+  const addNotification = useCallback((message: string, type: keyof NotificationSettings = 'enabled') => {
+    // Check if notifications are enabled for this type
+    if (!notificationSettings.enabled || !notificationSettings[type]) {
+      return
+    }
+    
     setNotifications(prev => [...prev, message])
     setTimeout(() => {
       setNotifications(prev => prev.slice(1))
     }, 3000)
-  }, [])
+  }, [notificationSettings])
 
   const handleClick = useCallback(() => {
     let clickValue = gameState.perClick
@@ -149,7 +172,7 @@ export function useGameState() {
       if (Math.random() < 0.01 && !prev.powerUps.golden.active) {
         const newPowerUps = { ...prev.powerUps }
         newPowerUps.golden = { active: true, timeLeft: 10 }
-        addNotification("✨ Zeub Doré activé! +500% gains pendant 10s")
+        addNotification("✨ Zeub Doré activé! +500% gains pendant 10s", 'powerUps')
         
         return {
           ...prev,
@@ -186,6 +209,16 @@ export function useGameState() {
         newUpgrades[upgradeId] = {
           count: currentUpgrade.count + 1,
           cost: Math.floor(currentUpgrade.cost * 1.15)
+        }
+        
+        // Special handling for cursor upgrade - affects perClick instead of perSecond
+        if (upgradeId === 'cursor') {
+          return {
+            ...prev,
+            money: prev.money - currentUpgrade.cost,
+            perClick: prev.perClick + 1,
+            upgrades: newUpgrades
+          }
         }
         
         return {
@@ -236,12 +269,19 @@ export function useGameState() {
     }
   }, [gameState.stockMarket])
 
+  const resetGame = useCallback(() => {
+    setGameState(getInitialGameState())
+    setNotifications([])
+  }, [])
+
   return {
     gameState,
     notifications,
+    notificationSettings,
     handleClick,
     buyUpgrade,
     buyStock,
-    sellStock
+    sellStock,
+    resetGame
   }
 }
