@@ -17,6 +17,12 @@ export interface GameState {
     clickFrenzy: { active: boolean; timeLeft: number }
   }
   unlockedAchievements: { [key: string]: boolean }
+  purseStats: {
+    totalCaptured: number
+    totalEarned: number
+    lastCaptureTime: number
+    recentCaptures: number[]
+  }
 }
 
 export interface Upgrade {

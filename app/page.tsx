@@ -10,6 +10,7 @@ import { StocksTab } from "@/components/game/stocks-tab"
 import { AchievementsTab } from "@/components/game/achievements-tab"
 import { StatsTab } from "@/components/game/stats-tab"
 import { Notifications } from "@/components/game/notifications"
+import { FlyingPurse } from "@/components/game/flying-purse"
 import { useGameState } from "@/hooks/use-game-state"
 import SettingsPage from '@/components/game/settings-page'
 import SaveSelectionPage from '@/components/game/save-selection-page'
@@ -26,7 +27,8 @@ export default function ZeubClicker() {
     buyStock,
     sellStock,
     resetGame,
-    loadSpecificGame
+    loadSpecificGame,
+    handlePurseCapture
   } = useGameState()
   
   const [showSettings, setShowSettings] = useState(false)
@@ -87,7 +89,14 @@ export default function ZeubClicker() {
         <Notifications notifications={notifications} />
 
         {/* Main Game Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
+          {/* Flying Purse System */}
+          <FlyingPurse 
+            gameState={gameState} 
+            onPurseCapture={handlePurseCapture}
+            isActive={gameInitialized && !showSettings}
+          />
+          
           {/* Left Column - Main Clicker */}
           <div className="lg:col-span-1">
             <ClickerArea gameState={gameState} onClick={handleClick} />

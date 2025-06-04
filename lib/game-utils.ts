@@ -24,34 +24,50 @@ export const loadGame = (): GameState | null => {
   return null
 }
 
-export const getInitialGameState = (): GameState => ({
-  money: 0,
-  totalEarned: 0,
-  perClick: 1,
-  perSecond: 0,
-  level: 1,
-  experience: 0,
-  experienceToNext: 100,
-  multiplier: 1.0,
-  startTime: Date.now(),
-  upgrades: UPGRADES.reduce((acc, upgrade) => {
-    acc[upgrade.id] = {
-      count: 0,
-      cost: upgrade.baseCost
+export function getInitialGameState(): GameState {
+  const initialUpgrades: { [key: string]: { count: number; cost: number } } = {}
+  UPGRADES.forEach(upgrade => {
+    initialUpgrades[upgrade.id] = { count: 0, cost: upgrade.baseCost }
+  })
+
+  const initialStockMarket: { [key: string]: { price: number; owned: number; trend: number; priceHistory: number[] } } = {}
+  STOCKS.forEach(stock => {
+    initialStockMarket[stock.id] = { 
+      price: stock.basePrice, 
+      owned: 0, 
+      trend: 0,
+      priceHistory: [stock.basePrice]
     }
-    return acc
-  }, {} as Record<string, { count: number; cost: number }>),
-  stockMarket: STOCKS.reduce((acc, stock) => {
-      acc[stock.id] = { price: stock.basePrice, owned: 0, trend: 0, priceHistory: [stock.basePrice] }
-      return acc
-    }, {} as Record<string, { price: number; owned: number; trend: number; priceHistory: number[] }>),
-  unlockedAchievements: ACHIEVEMENTS.reduce((acc: Record<string, boolean>, achievement: Achievement) => {
-    acc[achievement.id] = false
-    return acc
-  }, {} as Record<string, boolean>),
-  powerUps: {
-    golden: { active: false, timeLeft: 0 },
-    frenzy: { active: false, timeLeft: 0 },
-    clickFrenzy: { active: false, timeLeft: 0 }
+  })
+
+  const initialAchievements: { [key: string]: boolean } = {}
+  ACHIEVEMENTS.forEach(achievement => {
+    initialAchievements[achievement.id] = false
+  })
+
+  return {
+    money: 0,
+    totalEarned: 0,
+    perClick: 1,
+    perSecond: 0,
+    level: 1,
+    experience: 0,
+    experienceToNext: 100,
+    multiplier: 1.0,
+    startTime: Date.now(),
+    upgrades: initialUpgrades,
+    stockMarket: initialStockMarket,
+    powerUps: {
+      golden: { active: false, timeLeft: 0 },
+      frenzy: { active: false, timeLeft: 0 },
+      clickFrenzy: { active: false, timeLeft: 0 }
+    },
+    unlockedAchievements: initialAchievements,
+    purseStats: {
+      totalCaptured: 0,
+      totalEarned: 0,
+      lastCaptureTime: 0,
+      recentCaptures: []
+    }
   }
-})
+}

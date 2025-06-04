@@ -10,6 +10,7 @@ import {
   loadNotificationSettings,
   NotificationSettings 
 } from "@/lib/cookie-utils"
+import { formatNumber } from "@/lib/utils"
 
 export function useGameState() {
   const [gameState, setGameState] = useState<GameState>(getInitialGameState())
@@ -119,6 +120,21 @@ export function useGameState() {
     return () => clearInterval(interval)
   }, [])
 
+  // Ensure purseStats exists for backward compatibility with existing saves
+  useEffect(() => {
+    if (!gameState.purseStats) {
+      setGameState(prev => ({
+        ...prev,
+        purseStats: {
+          totalCaptured: 0,
+          totalEarned: 0,
+          lastCaptureTime: 0,
+          recentCaptures: []
+        }
+      }))
+    }
+  }, [])
+
   // Check achievements
   useEffect(() => {
     ACHIEVEMENTS.forEach(achievement => {
@@ -133,7 +149,7 @@ export function useGameState() {
         addNotification(`🏆 Succès débloqué: ${achievement.name}!`, 'achievements')
       }
     })
-  }, [gameState.money, gameState.totalEarned, gameState.level, gameState.stockMarket])
+  }, [gameState.money, gameState.totalEarned, gameState.level, gameState.stockMarket, gameState.purseStats])
 
   const addNotification = useCallback((message: string, type: keyof NotificationSettings = 'enabled') => {
     // Check if notifications are enabled for this type
@@ -279,6 +295,57 @@ export function useGameState() {
     setNotifications([])
   }, [])
 
+  const handlePurseCapture = useCallback((value: number) => {
+    setGameState(prevState => {
+      const newMoney = prevState.money + value
+      const newTotalEarned = prevState.totalEarned + value
+      
+      // Calculate experience gained from purse (10% of value)
+      const expGained = Math.floor(value * 0.1)
+      const newExperience = prevState.experience + expGained
+      
+      // Check for level up
+      let newLevel = prevState.level
+      let newExperienceToNext = prevState.experienceToNext
+      
+      if (newExperience >= prevState.experienceToNext) {
+        newLevel = prevState.level + 1
+        newExperienceToNext = Math.floor(100 * Math.pow(1.5, newLevel - 1))
+      }
+      
+      // Update purse statistics
+      const currentTime = Date.now()
+      const existingPurseStats = prevState.purseStats || {
+        totalCaptured: 0,
+        totalEarned: 0,
+        lastCaptureTime: 0,
+        recentCaptures: []
+      }
+      
+      const recentCaptures = [...(existingPurseStats.recentCaptures || []), currentTime]
+        .filter(time => currentTime - time < 30000) // Keep only captures from last 30 seconds
+      
+      const newPurseStats = {
+        totalCaptured: (existingPurseStats.totalCaptured || 0) + 1,
+        totalEarned: (existingPurseStats.totalEarned || 0) + value,
+        lastCaptureTime: currentTime,
+        recentCaptures
+      }
+      
+      return {
+        ...prevState,
+        money: newMoney,
+        totalEarned: newTotalEarned,
+        experience: newExperience,
+        level: newLevel,
+        experienceToNext: newExperienceToNext,
+        purseStats: newPurseStats
+      }
+    })
+    
+    addNotification(`💰 Bourse capturée ! +${formatNumber(value)} Zeubs`, 'enabled')
+  }, [addNotification])
+
   return {
     gameState,
     notifications,
@@ -288,6 +355,7 @@ export function useGameState() {
     buyStock,
     sellStock,
     resetGame,
-    loadSpecificGame
+    loadSpecificGame,
+    handlePurseCapture
   }
 }

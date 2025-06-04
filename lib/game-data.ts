@@ -1,4 +1,5 @@
 import { Upgrade, Stock, Achievement } from '@/types/game'
+import { getAllAchievements } from './purse-achievements'
 
 export const UPGRADES: Upgrade[] = [
   { id: "cursor", name: "Curseur Magique", description: "+1 par clic", baseCost: 15, baseProduction: 0, emoji: "👆" },
@@ -19,9 +20,12 @@ export const STOCKS: Stock[] = [
   { id: "veggieindex", name: "VeggieIndex", basePrice: 100, emoji: "📈" }
 ]
 
-export const ACHIEVEMENTS: Achievement[] = [
+export const BASE_ACHIEVEMENTS: Achievement[] = [
   { id: "first_click", name: "Premier clic", description: "Effectuer le premier clic", condition: (state) => state.totalEarned > 0, emoji: "👆" },
   { id: "millionaire", name: "Millionnaire", description: "Gagner 1M au total", condition: (state) => state.totalEarned >= 1000000, emoji: "💰" },
   { id: "level_10", name: "Niveau 10", description: "Atteindre le niveau 10", condition: (state) => state.level >= 10, emoji: "🔟" },
   { id: "investor", name: "Investisseur", description: "Faire son premier investissement", condition: (state) => Object.values(state.stockMarket).some(stock => stock.owned > 0), emoji: "📊" }
 ]
+
+// Combine base achievements with purse achievements
+export const ACHIEVEMENTS: Achievement[] = getAllAchievements(BASE_ACHIEVEMENTS)

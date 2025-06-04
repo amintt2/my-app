@@ -71,23 +71,23 @@ Voir si il y a des dépendances manquantes, ou des compsant a cree, les cree dan
 ### 🟡 COMPLEXITÉ MOYENNE
 
 #### Système de bonus Zubdoré avancé
-- [ ] **Animation bourse volante** : Créer bourse qui traverse l'écran
-  - [ ] Composant React pour bourse animée
-  - [ ] Animation CSS/Framer Motion fluide
-  - [ ] Vitesse optimale pour interaction
-  - [ ] Gestion des collisions/clics
+- [x] **Animation bourse volante** : Créer bourse qui traverse l'écran
+  - [x] Composant React pour bourse animée
+  - [x] Animation CSS/Framer Motion fluide
+  - [x] Vitesse optimale pour interaction
+  - [x] Gestion des collisions/clics
 
-- [ ] **Système de capture** : Interaction avec la bourse
-  - [ ] Détection de clic sur bourse en mouvement
-  - [ ] Calcul richesse selon niveau XP
-  - [ ] Effets visuels lors de capture
-  - [ ] Son/feedback de réussite
+- [x] **Système de capture** : Interaction avec la bourse
+  - [x] Détection de clic sur bourse en mouvement
+  - [x] Calcul richesse selon niveau XP
+  - [x] Effets visuels lors de capture
+  - [x] Son/feedback de réussite
 
-- [ ] **Richesse progressive** : Bonus adaptatif selon niveau
-  - [ ] Formule de calcul basée sur XP
-  - [ ] Multiplicateurs selon achievements
-  - [ ] Bonus aléatoires occasionnels
-  - [ ] Équilibrage avec économie du jeu
+- [x] **Richesse progressive** : Bonus adaptatif selon niveau
+  - [x] Formule de calcul basée sur XP
+  - [x] Multiplicateurs selon achievements
+  - [x] Bonus aléatoires occasionnels
+  - [x] Équilibrage avec économie du jeu
 
 #### Optimisations techniques
 - [ ] **Performance animations** : Optimiser rendu des bourses

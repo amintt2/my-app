@@ -2,12 +2,18 @@ import { GameState } from '@/types/game'
 
 // Cookie utility functions for game data persistence
 export const setCookie = (name: string, value: string, days: number = 30) => {
+  // Check if running in browser environment
+  if (typeof window === 'undefined' || typeof document === 'undefined') return
+  
   const expires = new Date()
   expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
   document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
 }
 
 export const getCookie = (name: string): string | null => {
+  // Check if running in browser environment
+  if (typeof window === 'undefined' || typeof document === 'undefined') return null
+  
   const nameEQ = name + "="
   const ca = document.cookie.split(';')
   for (let i = 0; i < ca.length; i++) {
@@ -19,6 +25,9 @@ export const getCookie = (name: string): string | null => {
 }
 
 export const deleteCookie = (name: string) => {
+  // Check if running in browser environment
+  if (typeof window === 'undefined' || typeof document === 'undefined') return
+  
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
 }
 

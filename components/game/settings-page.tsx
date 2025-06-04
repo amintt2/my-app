@@ -17,6 +17,7 @@ import {
 } from '@/lib/cookie-utils'
 import { GameState } from '@/types/game'
 import { formatNumber } from '@/lib/game-utils'
+import { PurseSettingsComponent } from './purse-settings'
 
 interface SettingsPageProps {
   gameState: GameState
@@ -28,6 +29,11 @@ export default function SettingsPage({ gameState, onClose, onResetGame }: Settin
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(loadNotificationSettings())
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [saveStatus, setSaveStatus] = useState<string | null>(null)
+  const [purseSettings, setPurseSettings] = useState({
+    enabled: true,
+    spawnRate: 50,
+    difficulty: 100
+  })
 
   useEffect(() => {
     // Auto-save notification settings when they change
@@ -192,6 +198,14 @@ export default function SettingsPage({ gameState, onClose, onResetGame }: Settin
               </div>
             </div>
           </div>
+
+          <Separator className="bg-white/20" />
+
+          {/* Purse Settings */}
+          <PurseSettingsComponent 
+            settings={purseSettings}
+            onSettingsChange={setPurseSettings}
+          />
 
           <Separator className="bg-white/20" />
 
